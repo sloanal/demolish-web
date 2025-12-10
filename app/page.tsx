@@ -162,7 +162,7 @@ function Showcase() {
         className="relative w-full max-w-6xl aspect-video rounded-2xl overflow-hidden group shadow-[0_0_100px_rgba(0,240,255,0.05)]"
       >
         <Image
-          src="/app-screenshot.png"
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/app-screenshot.png`}
           alt="Demolish App Interface"
           fill
           className="object-contain"
@@ -192,7 +192,7 @@ function CTA() {
         
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-[#00f0ff] to-[#4f46e5] rounded-full blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
-          <a href="/Demolish 2025-12-09 22-05-53.zip" download className="relative px-16 py-8 bg-black/90 backdrop-blur-xl rounded-full leading-none flex items-center divide-x divide-white/10 border border-white/10 group-hover:border-white/30 transition-all">
+          <a href={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/demolish-game.zip`} download className="relative px-16 py-8 bg-black/90 backdrop-blur-xl rounded-full leading-none flex items-center divide-x divide-white/10 border border-white/10 group-hover:border-white/30 transition-all">
             <div className="pr-8 flex items-center gap-6">
               <Image
                 src={Logo}
