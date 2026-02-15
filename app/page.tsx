@@ -213,7 +213,7 @@ function CTA() {
       </motion.div>
 
       <div className="mt-12 flex flex-col items-center gap-2 z-10">
-        <span className="font-mono text-xs text-gray-500 tracking-widest">v1.1-beta</span>
+        <span className="font-mono text-xs text-gray-500 tracking-widest">v1.2</span>
         <a href="https://linear.app/integrate/project/demolish-d2986f28b3dc" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-gray-600 hover:text-[#00f0ff] transition-colors">
           View Known Issues
         </a>
