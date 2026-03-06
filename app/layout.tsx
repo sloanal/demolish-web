@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Syncopate, Pinyon_Script, Inter } from "next/font/google";
+import { Syne, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
-const syncopate = Syncopate({
-  weight: ["400", "700"],
+const syne = Syne({
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-syncopate",
+  variable: "--font-syne",
   display: "swap",
 });
 
-const pinyonScript = Pinyon_Script({
+const instrumentSerif = Instrument_Serif({
   weight: "400",
+  style: ["normal", "italic"],
   subsets: ["latin"],
-  variable: "--font-pinyon",
+  variable: "--font-instrument",
   display: "swap",
 });
 
@@ -36,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${syncopate.variable} ${pinyonScript.variable} ${inter.variable} antialiased font-sans bg-black text-[#ededed] overflow-x-hidden`}
+        className={`${syne.variable} ${instrumentSerif.variable} ${inter.variable} antialiased font-sans bg-[#080808] text-[#F0EDE8] overflow-x-hidden`}
       >
         <SmoothScroll>
           <div className="grain-overlay" />

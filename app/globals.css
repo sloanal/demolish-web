@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-accent: #4f46e5; /* Deep Indigo/Purple base */
-  --color-accent-glow: #00f0ff; /* Cyan/Electric Blue for the glass edges */
-  --color-dark: #050505;
-  --font-display: "Syncopate", sans-serif;
-  --font-cursive: "Pinyon Script", cursive;
+  --color-accent: #cdff00;
+  --color-accent-secondary: #7c3aed;
+  --color-dark: #080808;
+  --font-display: "Syne", sans-serif;
+  --font-serif: "Instrument Serif", serif;
 }
 
 :root {
-  --background: #050505;
-  --foreground: #ededed;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.03);
+  --background: #080808;
+  --foreground: #f0ede8;
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.025);
 }
 
 body {
@@ -23,12 +23,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dynamic Chromatic Aberration */
+/* ── Chromatic Aberration ── */
+
 .chromatic-text {
   position: relative;
   display: inline-block;
   color: white;
-  mix-blend-mode: normal;
 }
 
 .chromatic-text::before,
@@ -39,43 +39,62 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.8;
+  opacity: 0.65;
   pointer-events: none;
-  transition: transform 0.1s ease-out;
 }
 
 .chromatic-text::before {
-  color: #00f0ff; /* Cyan */
+  color: #cdff00;
   z-index: -1;
-  transform: translate(calc(var(--aberration-x, 0px) * -1), calc(var(--aberration-y, 0px) * -1));
+  transform: translate(
+    calc(var(--aberration-x, 0px) * -1),
+    calc(var(--aberration-y, 0px) * -1)
+  );
   mix-blend-mode: screen;
 }
 
 .chromatic-text::after {
-  color: #ff0055; /* Magenta/Red */
+  color: #7c3aed;
   z-index: -2;
   transform: translate(var(--aberration-x, 0px), var(--aberration-y, 0px));
   mix-blend-mode: screen;
 }
 
-/* Glass Utilities */
+/* ── Glass ── */
+
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
 }
 
-.glass-text {
-  background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
+/* ── Outlined / Stroke Text ── */
+
+.text-outline {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.1);
   color: transparent;
-  text-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* Grain Overlay */
+/* ── Marquee ── */
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+/* ── Grain Overlay ── */
+
 .grain-overlay {
   position: fixed;
   top: 0;
@@ -85,5 +104,24 @@ body {
   pointer-events: none;
   z-index: 9999;
   opacity: 0.03;
+  will-change: transform;
+  transform: translateZ(0);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+
+  .chromatic-text::before,
+  .chromatic-text::after {
+    display: none;
+  }
+
+  .grain-overlay {
+    display: none;
+  }
 }

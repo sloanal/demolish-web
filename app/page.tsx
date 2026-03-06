@@ -1,41 +1,38 @@
 "use client";
 
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+} from "framer-motion";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 import Background3D from "@/components/Background3D";
 import Logo from "./assets/logo.png";
 
 export default function Home() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Mouse position for aberration
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Normalize mouse position from -1 to 1
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = (e.clientY / window.innerHeight) * 2 - 1;
       mouseX.set(x);
       mouseY.set(y);
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
   return (
-    <main ref={containerRef} className="relative min-h-[200vh] flex flex-col items-center overflow-hidden selection:bg-[#00f0ff] selection:text-black">
-      {/* 3D Background */}
+    <main className="relative flex flex-col items-center overflow-hidden selection:bg-[#CDFF00] selection:text-black">
       <Background3D />
-
       <Hero mouseX={mouseX} mouseY={mouseY} />
-      <Description mouseX={mouseX} />
+      <Marquee />
+      <Statement />
       <Showcase />
       <CTA />
       <Footer />
@@ -43,70 +40,107 @@ export default function Home() {
   );
 }
 
-function Hero({ mouseX, mouseY }: { mouseX: any, mouseY: any }) {
-  // Aberration intensity increases with scroll or simple movement
-  const aberrationX = useTransform(mouseX, [-1, 1], ["-5px", "5px"]);
-  const aberrationY = useTransform(mouseY, [-1, 1], ["-5px", "5px"]);
-  
-  // Create a spring for smoother movement
-  const springX = useSpring(aberrationX, { stiffness: 150, damping: 15 });
-  const springY = useSpring(aberrationY, { stiffness: 150, damping: 15 });
+/* ─────────────────────────────── Hero ─────────────────────────────── */
+
+function Hero(
+  { mouseX, mouseY }: {
+    mouseX: ReturnType<typeof useMotionValue<number>>;
+    mouseY: ReturnType<typeof useMotionValue<number>>;
+  },
+) {
+  const aberrationX = useTransform(mouseX, [-1, 1], ["-6px", "6px"]);
+  const aberrationY = useTransform(mouseY, [-1, 1], ["-6px", "6px"]);
+  const springX = useSpring(aberrationX, { stiffness: 120, damping: 20 });
+  const springY = useSpring(aberrationY, { stiffness: 120, damping: 20 });
 
   return (
-    <section className="relative w-full h-screen flex flex-col justify-center items-center px-4 md:px-10 z-10 perspective-[1000px]">
+    <section className="relative w-full min-h-screen flex flex-col justify-between px-6 md:px-12 pt-8 pb-12 z-10">
+      {/* ambient glow */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[60vw] h-[40vw] bg-[#CDFF00] rounded-full blur-[120px] opacity-[0.025]" />
+      </div>
+
+      {/* top bar */}
       <motion.div
-        initial={{ scale: 0.8, opacity: 0, filter: "blur(20px)" }}
-        animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1.5, ease: "circOut" }}
-        className="mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="flex items-center gap-3 relative z-10"
       >
         <Image
           src={Logo}
           alt="Demolish Logo"
-          width={120}
-          height={120}
-          className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]"
+          width={40}
+          height={40}
+          className="w-8 h-8 md:w-10 md:h-10 object-contain"
         />
+        <span className="text-[10px] md:text-xs tracking-[0.3em] uppercase text-[#6B6560] font-[family-name:var(--font-syne)] font-medium">
+          Demolish
+        </span>
       </motion.div>
 
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0, filter: "blur(20px)" }}
-        animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1.5, ease: "circOut" }}
-        className="relative flex flex-col md:flex-row items-baseline justify-center select-none"
-        style={{
-          // @ts-ignore
-          "--aberration-x": springX,
-          "--aberration-y": springY,
-        }}
-      >
-        <h1 
-          className="chromatic-text text-[15vw] md:text-[12vw] font-[family-name:var(--font-syncopate)] font-bold tracking-tighter leading-[0.8] text-white"
-          data-text="DEMO"
+      {/* wordmark */}
+      <div className="flex-1 flex flex-col justify-center items-center relative z-10 my-8">
+        <motion.div
+          initial={{ opacity: 0, filter: "blur(40px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+          className="relative flex flex-col md:flex-row md:items-baseline md:justify-center select-none w-full"
+          style={{
+            // @ts-ignore
+            "--aberration-x": springX,
+            "--aberration-y": springY,
+          }}
         >
-          DEMO
-        </h1>
-        <h1 className="text-[15vw] md:text-[12vw] font-[family-name:var(--font-pinyon)] font-normal text-[#00f0ff] leading-[0.8] ml-[-2vw] md:ml-[-1vw] z-10 -rotate-6 transform translate-y-4 md:translate-y-8 glass-text drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]">
-          lish
-        </h1>
-      </motion.div>
-      
-      <motion.div
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-20 md:bottom-32 left-0 right-0 text-center"
-      >
-        <p className="font-[family-name:var(--font-syncopate)] text-xs md:text-sm tracking-[0.5em] uppercase opacity-50 text-[#00f0ff]">
-          Scroll to Demolish
-        </p>
-        <motion.div 
-          animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="mt-4 flex justify-center"
+          <h1
+            className="chromatic-text text-[18vw] md:text-[14vw] font-[family-name:var(--font-syne)] font-extrabold tracking-[-0.06em] leading-[0.75] text-white"
+            data-text="DEMO"
+          >
+            DEMO
+          </h1>
+          <h1 className="text-[16vw] md:text-[12vw] font-[family-name:var(--font-instrument)] italic text-[#CDFF00] leading-[0.75] self-end md:self-auto -mt-[3vw] md:mt-0 md:ml-[-1.5vw] -rotate-3">
+            lish
+          </h1>
+        </motion.div>
+
+        {/* accent rule + subtitle */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+          className="mt-12 md:mt-16 text-center"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          <div className="w-8 h-px bg-[#CDFF00]/40 mx-auto mb-5" />
+          <p className="font-[family-name:var(--font-syne)] text-[10px] md:text-xs tracking-[0.35em] uppercase text-[#6B6560]">
+            purpose-built for demoing collaborative software
+          </p>
+        </motion.div>
+      </div>
+
+      {/* scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 1 }}
+        className="text-center relative z-10"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+          className="flex justify-center"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#CDFF00"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="opacity-40"
+          >
+            <path d="M12 5v14M19 12l-7 7-7-7" />
           </svg>
         </motion.div>
       </motion.div>
@@ -114,36 +148,81 @@ function Hero({ mouseX, mouseY }: { mouseX: any, mouseY: any }) {
   );
 }
 
-function Description({ mouseX }: { mouseX: any }) {
+/* ────────────────────────────── Marquee ────────────────────────────── */
+
+function Marquee() {
+  return (
+    <div className="w-full py-6 md:py-8 overflow-hidden border-y border-white/[0.06] z-10 relative">
+      <div className="animate-marquee flex whitespace-nowrap">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span
+            key={i}
+            className="text-[10vw] md:text-[6vw] font-[family-name:var(--font-syne)] font-extrabold tracking-[-0.02em] text-outline mx-[2vw] shrink-0 select-none"
+            aria-hidden={i > 0}
+          >
+            DEMOLISH
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────── Statement ───────────────────────────── */
+
+function Statement() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
 
-  const x = useTransform(scrollYProgress, [0, 0.5, 1], [100, 0, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const headingOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.8, 1],
+    [0, 1, 1, 0],
+  );
+  const headingY = useTransform(scrollYProgress, [0, 0.2], [80, 0]);
+  const paraOpacity = useTransform(
+    scrollYProgress,
+    [0.1, 0.3, 0.8, 1],
+    [0, 1, 1, 0],
+  );
+  const paraY = useTransform(scrollYProgress, [0.1, 0.3], [40, 0]);
 
   return (
-    <section ref={ref} className="w-full py-24 md:py-48 flex flex-col items-center justify-center text-center px-6 md:px-20 z-10">
-      <motion.div 
-        style={{ opacity }}
-        className="glass-panel p-12 rounded-[2rem] max-w-5xl border border-white/5"
-      >
-        <h2 className="text-4xl md:text-7xl font-[family-name:var(--font-inter)] font-light mb-12">
-          A <span className="font-[family-name:var(--font-pinyon)] text-[#00f0ff] text-5xl md:text-8xl mx-2 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">delicious</span> tool for demoing.
-        </h2>
-
-        <motion.p 
-          style={{ x }}
-          className="text-lg md:text-2xl font-[family-name:var(--font-inter)] font-light text-gray-300 max-w-3xl leading-relaxed mx-auto"
+    <section
+      ref={ref}
+      className="w-full py-32 md:py-48 lg:py-64 px-6 md:px-12 lg:px-20 z-10"
+    >
+      <div className="max-w-6xl">
+        <motion.h2
+          style={{ opacity: headingOpacity, y: headingY }}
+          className="text-[11vw] md:text-[7vw] lg:text-[5.5vw] font-[family-name:var(--font-inter)] font-extralight leading-[1.1] tracking-[-0.03em] text-[#F0EDE8]"
         >
-          Users no longer need one incognito window open with one regular window open while awkwardly sharing their entire screen to demo collaboration actions.
+          A{" "}
+          <span className="font-[family-name:var(--font-instrument)] italic text-[#CDFF00]">
+            delicious
+          </span>{" "}
+          tool
+          <br className="hidden md:block" />
+          {" "}for demoing.
+        </motion.h2>
+
+        <motion.p
+          style={{ opacity: paraOpacity, y: paraY }}
+          className="mt-10 md:mt-16 text-lg md:text-xl lg:text-2xl font-[family-name:var(--font-inter)] font-light text-[#9E9A92] max-w-2xl leading-relaxed"
+        >
+          Users no longer need one incognito window open with one regular window
+          open while awkwardly sharing their entire screen to demo collaboration
+          actions.
         </motion.p>
-      </motion.div>
+      </div>
     </section>
   );
 }
+
+/* ───────────────────────────── Showcase ────────────────────────────── */
 
 function Showcase() {
   const ref = useRef(null);
@@ -152,14 +231,18 @@ function Showcase() {
     offset: ["start end", "end start"],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.85, 1, 0.9]);
-  const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const scale = useTransform(scrollYProgress, [0, 0.4], [0.88, 1]);
+  const rotateX = useTransform(scrollYProgress, [0, 0.4], [10, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.25], [0.3, 1]);
 
   return (
-    <section ref={ref} className="w-full min-h-screen py-24 flex items-center justify-center px-4">
-      <motion.div 
-        style={{ scale, y }}
-        className="relative w-full max-w-6xl aspect-video rounded-2xl overflow-hidden group shadow-[0_0_100px_rgba(0,240,255,0.05)]"
+    <section
+      ref={ref}
+      className="w-full py-12 md:py-20 flex items-center justify-center px-4 md:px-8 z-10 [perspective:1200px]"
+    >
+      <motion.div
+        style={{ scale, rotateX, opacity }}
+        className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-3xl overflow-hidden border border-white/[0.06]"
       >
         <Image
           src="/app-screenshot.png"
@@ -173,60 +256,82 @@ function Showcase() {
   );
 }
 
+/* ─────────────────────────────── CTA ──────────────────────────────── */
+
 function CTA() {
   return (
-    <section className="w-full py-32 flex flex-col items-center justify-center text-center px-4 relative">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-         <div className="w-[40rem] h-[40rem] bg-gradient-to-b from-[#00f0ff] to-[#4f46e5] rounded-full blur-[150px]" />
+    <section className="w-full py-32 md:py-48 flex flex-col items-center justify-center text-center px-6 relative z-10">
+      {/* layered gradient glow */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute w-[30rem] h-[30rem] bg-[#CDFF00] rounded-full blur-[120px] opacity-[0.05]" />
+        <div className="absolute w-[40rem] h-[40rem] bg-[#7C3AED] rounded-full blur-[120px] opacity-[0.06] translate-y-24" />
       </div>
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative group z-10 flex flex-col items-center"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="relative z-10 flex flex-col items-center"
       >
-        <p className="mb-12 text-xl md:text-3xl font-[family-name:var(--font-inter)] font-normal text-white max-w-2xl bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-           Demolish is a tool purpose built for demoing collaborative software.
-        </p>
-        
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#00f0ff] to-[#4f46e5] rounded-full blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
-          <a href="/Demolish.zip" download className="relative px-16 py-8 bg-black/90 backdrop-blur-xl rounded-full leading-none flex items-center divide-x divide-white/10 border border-white/10 group-hover:border-white/30 transition-all">
-            <div className="pr-8 flex items-center gap-6">
-              <Image
-                src={Logo}
-                alt="Demolish Logo"
-                width={48}
-                height={48}
-                className="w-10 h-10 md:w-12 md:h-12 object-contain"
-              />
-              <span className="text-white text-3xl font-[family-name:var(--font-syncopate)] font-bold group-hover:text-[#00f0ff] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
-                Download
-              </span>
-            </div>
-            <span className="pl-8 text-gray-400 group-hover:text-white transition-colors font-mono">
-              macOS
-            </span>
+        <h3 className="text-3xl md:text-5xl lg:text-6xl font-[family-name:var(--font-inter)] font-extralight tracking-[-0.02em] text-[#F0EDE8] max-w-3xl leading-[1.15] mb-14 md:mb-20">
+          Stop sharing your entire screen.{" "}
+          <span className="text-[#6B6560]">Start demolishing.</span>
+        </h3>
+
+        <motion.a
+          href="/Demolish.zip"
+          download
+          className="group relative inline-flex items-center gap-4 px-10 py-5 md:px-14 md:py-6 bg-[#CDFF00] text-[#080808] rounded-full font-[family-name:var(--font-syne)] font-bold text-lg md:text-xl tracking-tight hover:bg-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#CDFF00]"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <Image
+            src={Logo}
+            alt="Demolish Logo"
+            width={32}
+            height={32}
+            className="w-7 h-7 md:w-8 md:h-8 object-contain"
+          />
+          <span>Download for macOS</span>
+        </motion.a>
+
+        <div className="mt-8 flex items-center gap-4">
+          <span className="font-mono text-[10px] text-[#4A4540] tracking-widest">
+            v1.2
+          </span>
+          <span className="text-[#2A2520]" aria-hidden>
+            ·
+          </span>
+          <a
+            href="https://linear.app/integrate/project/demolish-d2986f28b3dc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] text-[#4A4540] hover:text-[#CDFF00] transition-colors duration-200"
+          >
+            Known Issues
           </a>
         </div>
       </motion.div>
-
-      <div className="mt-12 flex flex-col items-center gap-2 z-10">
-        <span className="font-mono text-xs text-gray-500 tracking-widest">v1.2</span>
-        <a href="https://linear.app/integrate/project/demolish-d2986f28b3dc" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-gray-600 hover:text-[#00f0ff] transition-colors">
-          View Known Issues
-        </a>
-      </div>
     </section>
   );
 }
 
+/* ────────────────────────────── Footer ─────────────────────────────── */
+
 function Footer() {
   return (
-    <footer className="w-full py-12 flex justify-center items-center border-t border-white/5 bg-black z-10 relative">
-      <p className="font-[family-name:var(--font-inter)] text-sm text-gray-600 flex items-center gap-2 mix-blend-plus-lighter">
-        Made with <span className="text-[#00f0ff] animate-pulse">❤</span> by <a href="https://integrate.co" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-400 hover:text-white transition-colors">Integrate</a>
+    <footer className="w-full py-10 flex justify-center items-center border-t border-white/[0.04] z-10 relative">
+      <p className="font-[family-name:var(--font-inter)] text-xs text-[#3A3530] flex items-center gap-1.5 tracking-wide">
+        Made with <span className="text-[#CDFF00]">❤</span> by{" "}
+        <a
+          href="https://integrate.co"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#5A5550] hover:text-[#CDFF00] transition-colors duration-200"
+        >
+          Integrate
+        </a>
       </p>
     </footer>
   );
