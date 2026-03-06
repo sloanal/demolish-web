@@ -1,36 +1,13 @@
 "use client";
 
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useMotionValue,
-} from "framer-motion";
-import { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import Background3D from "@/components/Background3D";
 import Logo from "./assets/logo.png";
 
 export default function Home() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
-
   return (
     <main className="relative flex flex-col items-center overflow-hidden selection:bg-[#CDFF00] selection:text-black">
-      <Background3D />
-      <Hero mouseX={mouseX} mouseY={mouseY} />
+      <Hero />
       <Marquee />
       <Statement />
       <Showcase />
@@ -42,22 +19,12 @@ export default function Home() {
 
 /* ─────────────────────────────── Hero ─────────────────────────────── */
 
-function Hero(
-  { mouseX, mouseY }: {
-    mouseX: ReturnType<typeof useMotionValue<number>>;
-    mouseY: ReturnType<typeof useMotionValue<number>>;
-  },
-) {
-  const aberrationX = useTransform(mouseX, [-1, 1], ["-6px", "6px"]);
-  const aberrationY = useTransform(mouseY, [-1, 1], ["-6px", "6px"]);
-  const springX = useSpring(aberrationX, { stiffness: 120, damping: 20 });
-  const springY = useSpring(aberrationY, { stiffness: 120, damping: 20 });
-
+function Hero() {
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-between px-6 md:px-12 pt-8 pb-12 z-10">
-      {/* ambient glow */}
+      {/* ambient glow — native radial gradient, no blur filter */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[60vw] h-[40vw] bg-[#CDFF00] rounded-full blur-[120px] opacity-[0.025]" />
+        <div className="w-[80vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(205,255,0,0.03)_0%,transparent_70%)]" />
       </div>
 
       {/* top bar */}
@@ -82,15 +49,10 @@ function Hero(
       {/* wordmark */}
       <div className="flex-1 flex flex-col justify-center items-center relative z-10 my-8">
         <motion.div
-          initial={{ opacity: 0, filter: "blur(40px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="relative flex flex-col md:flex-row md:items-baseline md:justify-center select-none w-full"
-          style={{
-            // @ts-ignore
-            "--aberration-x": springX,
-            "--aberration-y": springY,
-          }}
         >
           <h1
             className="chromatic-text text-[18vw] md:text-[14vw] font-[family-name:var(--font-syne)] font-extrabold tracking-[-0.06em] leading-[0.75] text-white"
@@ -103,11 +65,10 @@ function Hero(
           </h1>
         </motion.div>
 
-        {/* accent rule + subtitle */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-12 md:mt-16 text-center"
         >
           <div className="w-8 h-px bg-[#CDFF00]/40 mx-auto mb-5" />
@@ -117,18 +78,14 @@ function Hero(
         </motion.div>
       </div>
 
-      {/* scroll indicator */}
+      {/* scroll indicator — CSS animation, no Framer Motion RAF loop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
         className="text-center relative z-10"
       >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          className="flex justify-center"
-        >
+        <div className="flex justify-center animate-bounce-arrow">
           <svg
             width="20"
             height="20"
@@ -142,7 +99,7 @@ function Hero(
           >
             <path d="M12 5v14M19 12l-7 7-7-7" />
           </svg>
-        </motion.div>
+        </div>
       </motion.div>
     </section>
   );
@@ -171,35 +128,16 @@ function Marquee() {
 /* ───────────────────────────── Statement ───────────────────────────── */
 
 function Statement() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  const headingOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.2, 0.8, 1],
-    [0, 1, 1, 0],
-  );
-  const headingY = useTransform(scrollYProgress, [0, 0.2], [80, 0]);
-  const paraOpacity = useTransform(
-    scrollYProgress,
-    [0.1, 0.3, 0.8, 1],
-    [0, 1, 1, 0],
-  );
-  const paraY = useTransform(scrollYProgress, [0.1, 0.3], [40, 0]);
-
   return (
-    <section
-      ref={ref}
-      className="w-full py-32 md:py-48 lg:py-64 px-6 md:px-12 lg:px-20 z-10"
-    >
-      <div className="max-w-6xl">
-        <motion.h2
-          style={{ opacity: headingOpacity, y: headingY }}
-          className="text-[11vw] md:text-[7vw] lg:text-[5.5vw] font-[family-name:var(--font-inter)] font-extralight leading-[1.1] tracking-[-0.03em] text-[#F0EDE8]"
-        >
+    <section className="w-full py-32 md:py-48 lg:py-64 px-6 md:px-12 lg:px-20 z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="max-w-6xl"
+      >
+        <h2 className="text-[11vw] md:text-[7vw] lg:text-[5.5vw] font-[family-name:var(--font-inter)] font-extralight leading-[1.1] tracking-[-0.03em] text-[#F0EDE8]">
           A{" "}
           <span className="font-[family-name:var(--font-instrument)] italic text-[#CDFF00]">
             delicious
@@ -207,17 +145,14 @@ function Statement() {
           tool
           <br className="hidden md:block" />
           {" "}for demoing.
-        </motion.h2>
+        </h2>
 
-        <motion.p
-          style={{ opacity: paraOpacity, y: paraY }}
-          className="mt-10 md:mt-16 text-lg md:text-xl lg:text-2xl font-[family-name:var(--font-inter)] font-light text-[#9E9A92] max-w-2xl leading-relaxed"
-        >
+        <p className="mt-10 md:mt-16 text-lg md:text-xl lg:text-2xl font-[family-name:var(--font-inter)] font-light text-[#9E9A92] max-w-2xl leading-relaxed">
           Users no longer need one incognito window open with one regular window
           open while awkwardly sharing their entire screen to demo collaboration
           actions.
-        </motion.p>
-      </div>
+        </p>
+      </motion.div>
     </section>
   );
 }
@@ -225,23 +160,13 @@ function Statement() {
 /* ───────────────────────────── Showcase ────────────────────────────── */
 
 function Showcase() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  const scale = useTransform(scrollYProgress, [0, 0.4], [0.88, 1]);
-  const rotateX = useTransform(scrollYProgress, [0, 0.4], [10, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.25], [0.3, 1]);
-
   return (
-    <section
-      ref={ref}
-      className="w-full py-12 md:py-20 flex items-center justify-center px-4 md:px-8 z-10 [perspective:1200px]"
-    >
+    <section className="w-full py-12 md:py-20 flex items-center justify-center px-4 md:px-8 z-10">
       <motion.div
-        style={{ scale, rotateX, opacity }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-50px" }}
         className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-3xl overflow-hidden border border-white/[0.06]"
       >
         <Image
@@ -261,16 +186,16 @@ function Showcase() {
 function CTA() {
   return (
     <section className="w-full py-32 md:py-48 flex flex-col items-center justify-center text-center px-6 relative z-10">
-      {/* layered gradient glow */}
+      {/* gradient glow — radial gradients, no blur filter */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="absolute w-[30rem] h-[30rem] bg-[#CDFF00] rounded-full blur-[120px] opacity-[0.05]" />
-        <div className="absolute w-[40rem] h-[40rem] bg-[#7C3AED] rounded-full blur-[120px] opacity-[0.06] translate-y-24" />
+        <div className="absolute w-[50rem] h-[50rem] rounded-full bg-[radial-gradient(circle,rgba(205,255,0,0.06)_0%,transparent_60%)]" />
+        <div className="absolute w-[60rem] h-[60rem] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.06)_0%,transparent_60%)] translate-y-24" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true, margin: "-100px" }}
         className="relative z-10 flex flex-col items-center"
       >
@@ -279,12 +204,10 @@ function CTA() {
           <span className="text-[#6B6560]">Start demolishing.</span>
         </h3>
 
-        <motion.a
+        <a
           href="/Demolish.zip"
           download
-          className="group relative inline-flex items-center gap-4 px-10 py-5 md:px-14 md:py-6 bg-[#CDFF00] text-[#080808] rounded-full font-[family-name:var(--font-syne)] font-bold text-lg md:text-xl tracking-tight hover:bg-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#CDFF00]"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
+          className="group relative inline-flex items-center gap-4 px-10 py-5 md:px-14 md:py-6 bg-[#CDFF00] text-[#080808] rounded-full font-[family-name:var(--font-syne)] font-bold text-lg md:text-xl tracking-tight hover:bg-white hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#CDFF00]"
         >
           <Image
             src={Logo}
@@ -294,7 +217,7 @@ function CTA() {
             className="w-7 h-7 md:w-8 md:h-8 object-contain"
           />
           <span>Download for macOS</span>
-        </motion.a>
+        </a>
 
         <div className="mt-8 flex items-center gap-4">
           <span className="font-mono text-[10px] text-[#4A4540] tracking-widest">

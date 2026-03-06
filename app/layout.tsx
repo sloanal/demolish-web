@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
-import SmoothScroll from "@/components/SmoothScroll";
 
 const syne = Syne({
   weight: ["400", "500", "600", "700", "800"],
@@ -39,10 +38,7 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${instrumentSerif.variable} ${inter.variable} antialiased font-sans bg-[#080808] text-[#F0EDE8] overflow-x-hidden`}
       >
-        <SmoothScroll>
-          <div className="grain-overlay" />
-          {children}
-        </SmoothScroll>
+        {children}
       </body>
     </html>
   );
