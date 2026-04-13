@@ -221,7 +221,7 @@ function CTA() {
 
         <div className="mt-8 flex items-center gap-4">
           <span className="font-mono text-[10px] text-[#4A4540] tracking-widest">
-            v1.2
+            v1.4
           </span>
           <span className="text-[#2A2520]" aria-hidden>
             ·
